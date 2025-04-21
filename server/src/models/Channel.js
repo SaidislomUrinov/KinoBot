@@ -11,6 +11,10 @@ const schema = new Schema({
         type: Number,
         default: getNow
     },
+    type: {
+        type: String,
+        enum: ['public', 'private', 'request']
+    },
     target: Number,
 });
 schema.methods.result = async function () {

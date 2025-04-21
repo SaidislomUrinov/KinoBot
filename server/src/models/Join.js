@@ -10,6 +10,7 @@ const schema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'Channel'
     },
+
     created: {
         type: Number,
         default: getNow

@@ -24,7 +24,7 @@ button {
 
 body {
     max-width: 600px;
-    min-height: 100vh;
+    height: 100vh;
     /* max-height: 100vh; */
     margin: 0 auto;
     background: linear-gradient(to bottom, #0a354a, #16082f);

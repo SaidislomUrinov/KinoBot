@@ -41,7 +41,7 @@ const Loading = () => {
     </div>
   );
 };
-function Mapping({ data = [], loading = true, dsbld = true }) {
+function Mapping({ data = [], loading = true }) {
   const { access } = useSelector((e) => e?.user);
 
   const [movie, setMovie] = useState({
@@ -115,16 +115,8 @@ function Mapping({ data = [], loading = true, dsbld = true }) {
         setDisabled(false);
       });
   };
-  if (!loading || dsbld) {
+  if (!loading || !data?.[0]) {
     return <Loading />;
-  }
-  if (!data?.[0]) {
-    return (
-      <div className="flex flex-col items-center gap-[20px] justify-center w-full h-[50vh]">
-        <FaSmile className="text-[50px] text-white" />
-        <p className="text-[14px] text-gray-100">Natija topilmadi )</p>
-      </div>
-    );
   }
   return (
     <div className="flex items-start justify-between gap-[10px] w-full flex-wrap">
@@ -167,28 +159,18 @@ function Mapping({ data = [], loading = true, dsbld = true }) {
           onClick={closeMovie}
           className="absolute bottom-0 left-0 w-full h-[100vh] z-[3]"
         ></div>
+        {/*  */}
         <div className="flex items-center justify-start flex-col w-full z-[4] h-[80vh] bg-gray-900 border-t rounded-t-[30px] p-[20px] border-t-red-500">
           {/*  */}
-          <div className="flex items-start justify-start h-[20vh] gap-[10px] w-full">
-            {/* IMG */}
-            <div className="flex items-center justify-center border border-gray-500 overflow-hidden min-w-[40%] max-w-[40%] aspect-square rounded-[20px] relative">
-              <img src={API + movie?.imagePath} alt="media_img" />
-              <div className="absolute top-[0] right-[0] p-[5px]">
-                {movie?.isPremium && (
-                  <Chip color="red" variant="gradient" value="PREMIUM" />
-                )}
-              </div>
-            </div>
-            {/* ETC */}
-            <div className="flex gap-1 items-start justify-start flex-col w-full">
+          <div className="flex items-center relative justify-center w-full h-[150px] rounded-[20px] overflow-hidden">
+            <img
+              src={API + movie?.imagePath}
+              className="w-full"
+              alt="media_img"
+            />
+            <div className="absolute w-full flex items-center justify-center flex-col h-full bg-[#000000a8]">
               <p className="font-bold text-white">{movie?.name}</p>
               <p className="text-[12px] text-white">{movie?.genres}</p>
-              <p className="text-[12px] text-gray-400">
-                Chiqarilgan: {movie?.year}
-              </p>
-              <p className="text-[12px] text-gray-400">
-                Turi: {movie?.type === "movie" ? "kino" : "serial"}
-              </p>
               {movie?.type === "movie" && (
                 <p className="text-[12px] text-gray-400">
                   Davomiyligi: {movie?.duration}
@@ -200,8 +182,15 @@ function Mapping({ data = [], loading = true, dsbld = true }) {
                 </p>
               )}
             </div>
+            <div className="absolute top-[5px] right-[5px] p-[5px]">
+              {movie?.isPremium && (
+                <Chip color="red" variant="gradient" value="PREMIUM" />
+              )}
+            </div>
+            <div className="absolute top-[5px] left-[5px] p-[5px]">
+              <Chip color="yellow" variant="gradient" value={movie?.year} />
+            </div>
           </div>
-          {/*  */}
           {/*  */}
           {movie?.type === "movie" ? (
             <Button

@@ -8,7 +8,7 @@ function Genres() {
   const [q] = useSearchParams();
   const gid = q.get("gid");
   return (
-    <div className="flex items-center justify-start gap-[10px] w-full overflow-x-scroll">
+    <div className="flex items-center justify-start min-h-max gap-[10px] w-full overflow-x-scroll">
       <Button
         onClick={() => nv("?")}
         size="sm"

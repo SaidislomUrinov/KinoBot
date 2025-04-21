@@ -10,7 +10,7 @@ function Search() {
     setSearch("");
   }
   return (
-    <div className="flex items-center justify-center w-full h-[45px] relative">
+    <div className="flex items-center justify-center w-full min-h-[45px] relative">
       <input
         type="text"
         className="w-full h-full text-white text-[13px] placeholder:text-gray-300/50 bg-[#00000053] rounded-full p-[0_50px_0_20px] border border-blue-100/50 focus:border-blue-500"

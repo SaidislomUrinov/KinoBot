@@ -37,7 +37,6 @@ function Home() {
       try {
         const res = await getReq(url, {}, access);
         const { ok, data, msg, nextPage } = res.data;
-
         if (ok) {
           setData((prev) => (reset ? data : [...prev, ...data])); // Reset bo‘lsa almashtiradi, bo‘lmasa qo‘shadi
           setNext(nextPage);
@@ -70,16 +69,24 @@ function Home() {
     setPage((prev) => prev + 1);
     fetchData(false, page + 1);
   };
-
+  useEffect(() => {
+    if (data.length > 30) {
+      window.scrollTo({
+        top: window.scrollY + 300,
+        behavior: "smooth",
+      });
+    }
+  }, [data]);
   return (
     <div className="flex items-center justify-start flex-col gap-[10px] w-full">
-      <Mapping data={data} loading={load} dsbld={disabled} />
+      <Mapping data={data} loading={load} />
       {next && (
         <Button
           fullWidth
           color="white"
           className="rounded-full"
           disabled={disabled}
+          loading={disabled}
           onClick={nextPage}
         >
           Yana 30 ta

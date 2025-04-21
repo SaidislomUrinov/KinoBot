@@ -1,5 +1,6 @@
 import bot from "../bot/bot.js";
 import Channel from "../models/Channel.js"
+import Join from "../models/Join.js";
 import { formatDate } from "../utils/date.js";
 
 export default {
@@ -38,10 +39,31 @@ export default {
             url: c.url,
             created: formatDate(c.created),
             target: c.target,
+            type: c?.type,
             result: await c.result()
         }
     },
     delete: async (chId) => {
         return Channel.findByIdAndDelete(chId);
     },
+    checkMember: async (id) => {
+        try {
+            const channels = await Channel.find();
+            // 
+            let result = false;
+            for (let c of channels) {
+                if (c.type === 'request') {
+                    const join = await Join.findOne({ user: id, channel: c?._id });
+                    if (!join) {
+                        result = false;
+                        break
+                    }
+                }
+            };
+
+            return result
+        } catch (error) {
+            return false
+        }
+    }
 }

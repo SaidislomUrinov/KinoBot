@@ -10,6 +10,49 @@ import Genre from "../models/Genre.js";
 import Media from "../models/Media.js";
 import download from "../utils/download.js";
 const bot = new Bot(configs.token);
+// 
+bot.on(':forward_origin', async ctx => {
+    const { id } = ctx.message.from;
+    const chId = ctx.message?.forward_from_chat?.id
+
+    let user = await User.findOne({ id });
+
+    if (!user) {
+        user = new User({ id, admin: configs.admins.includes(id) });
+        await user.save();
+    }
+
+    const updateUser = async (step = '', etc = {}) => {
+        user.step = step;
+        user.etc = etc;
+        await user.save();
+    };
+    const sm = (txt, btn = userReply.back) => {
+        ctx.reply(txt, {
+            reply_markup: btn,
+            parse_mode: 'HTML'
+        });
+    };
+    if (user.admin) {
+        if (user.step === 'channel_add') {
+            try {
+                const status = (await channelService.checkAdmin(chId, bot.botInfo.id)).status;
+                if (status !== 'administrator') throw new Error();
+                updateUser('channell_type', { id: chId });
+                const msg = adminReply.channels.type;
+                return sm(msg.txt, msg.btn);
+            } catch {
+                return sm(adminReply.channels.add.errorTxt, adminReply.back);
+            }
+        } if (user.step === 'sendMessage') {
+            const users = await User.find({ admin: false });
+            await updateUser();
+            sendBatchMessages(ctx, users);
+            return;
+        }
+    }
+});
+// 
 bot.command('start', async ctx => {
     const { id } = ctx.message.from;
     let user = await User.findOne({ id });
@@ -83,14 +126,14 @@ bot.on(":text", async ctx => {
             const msg = adminReply.main;
             return sm(msg.txt, msg.btn);
         }
-        if (user.step === 'channell_target') {
+        if (user.step === 'channel_target') {
             if (isNaN(tx) || tx < 1) {
                 return sm(adminReply.channels.target, adminReply.back);
             }
             const link = (await channelService.createInviteLink(user.etc?.id)).invite_link;
             const info = await channelService.getChannelInfo(user.etc?.id);
             updateUser('channell_result', { ...user.etc, target: +tx, link, name: info.title, username: info.username, target: tx });
-            const msg = adminReply.channels.result(info, tx);
+            const msg = adminReply.channels.result({ ...info, type: user?.etc?.type }, tx);
             return sm(msg.txt, msg.btn);
         }
         if (user.step === 'sendMessage') {
@@ -158,7 +201,7 @@ bot.on(":text", async ctx => {
 bot.on('callback_query', async ctx => {
     const { id } = ctx.callbackQuery.from;
     const data = ctx.callbackQuery.data;
-    console.log(data);
+    // console.log(data);
     let user = await User.findOne({ id });
 
     if (!user) {
@@ -202,15 +245,19 @@ bot.on('callback_query', async ctx => {
                 updateUser('channel_add');
                 const msg = adminReply.channels.add;
                 return sm(msg.txt, msg.btn);
+            } if (dt === 'type') {
+                await updateUser('channel_target', { ...user.etc, type: dt2 });
+                return sm(adminReply.channels.target, adminReply.back);
             } if (dt === 'result') {
-                const { id: chId, target, link: url, name, username } = user.etc;
+                const { id: chId, target, link: url, name, username, type } = user.etc;
                 console.log(user.etc)
                 const channel = new Channel({
                     id: chId,
                     name,
                     url,
                     target: target || 100,
-                    username
+                    username,
+                    type
                 });
                 await channel.save();
                 updateUser();
@@ -342,7 +389,7 @@ bot.on('callback_query', async ctx => {
                     show_alert: true
                 });
             }
-            const media = await Media.countDocuments({ genre: genre._id });
+            const media = await Media.countDocuments({ genres: genre._id });
             const msg = adminReply.genres.show(genre, media);
             return sm(msg.txt, msg.btn);
         };
@@ -355,7 +402,7 @@ bot.on('callback_query', async ctx => {
                 const page = parseInt(dt2);
                 const limit = 15;
                 const skip = (page * limit) - limit;
-                const media = await Media.find().skip(skip).limit(limit);
+                const media = await Media.find().sort({ created: -1 }).skip(skip).limit(limit);
                 const pages = Math.ceil((await Media.countDocuments()) / limit);
                 const msg = adminReply.media.getAll(media, page, pages || 1);
                 return sm(msg.txt, msg.btn);
@@ -480,8 +527,7 @@ bot.on('callback_query', async ctx => {
                 parse_mode: 'HTML',
                 reply_markup: msg.btn
             });
-        }
-
+        };
     }
 
     if (data === 'main') {
@@ -512,47 +558,17 @@ bot.on('callback_query', async ctx => {
             caption: msg.txt,
             parse_mode: 'HTML',
             reply_markup: msg.btn
-        });
-    }
-});
-bot.on(':forward_origin', async ctx => {
-    const { id } = ctx.message.from;
-    const chId = ctx.message?.forward_from_chat?.id
+        }).then(ms => {
+            setTimeout(() => {
+                ctx.deleteMessage(user?.id, ms.message_id).then(() => {
+                    ctx.reply(`😁Xavfsizlik uchun <b>${media?.name}</b> chatdan o'chirildi!\n🟢Uni qayta ko'rish uchun pastdagi tugmani bosing`, {
+                        parse_mode: "HTML",
+                        reply_markup: new InlineKeyboard().text("🔄Qayta ko'rish", `sendMe_${media?._id}${media?.type === 'serial' ? `_${index}` : ''}`)
+                    }).catch(() => { });
+                }).catch(() => { });
+            }, 1000 * 60 * 60 * 3);
+        })
 
-    let user = await User.findOne({ id });
-
-    if (!user) {
-        user = new User({ id, admin: configs.admins.includes(id) });
-        await user.save();
-    }
-
-    const updateUser = async (step = '', etc = {}) => {
-        user.step = step;
-        user.etc = etc;
-        await user.save();
-    };
-    const sm = (txt, btn = userReply.back) => {
-        ctx.reply(txt, {
-            reply_markup: btn,
-            parse_mode: 'HTML'
-        });
-    };
-    if (user.admin) {
-        if (user.step === 'channel_add') {
-            try {
-                const status = (await channelService.checkAdmin(chId, bot.botInfo.id)).status;
-                if (status !== 'administrator') throw new Error();
-                updateUser('channell_target', { id: chId });
-                return sm(adminReply.channels.target, adminReply.back)
-            } catch {
-                return sm(adminReply.channels.add.errorTxt, adminReply.back);
-            }
-        } if (user.step === 'sendMessage') {
-            const users = await User.find({ admin: false });
-            await updateUser();
-            sendBatchMessages(ctx, users);
-            return;
-        }
     }
 });
 bot.on(':photo', async ctx => {

@@ -3,15 +3,15 @@ import { formatDate, formatDuration, getNow } from "../utils/date.js";
 const br = `\n${'-'.repeat(40)}\n`
 export const userReply = {
     start: {
-        txt: "<b>👋Salom</b>\n📱Bot orqali sevimli <b>kino</b> va <b>seriallarni</b> topishingiz mumkin\n🔢Kino kodini yuboring yoki pastdagi <b>🖼️Kinolar</b> tugmasini bosing!",
+        txt: "<b>👋Salom</b>\n📱Bot orqali sevimli <b>kino</b> va <b>seriallarni</b> topishingiz mumkin\n🔢Kino kodini yuboring yoki pastdagi <b>🎬Kinolar</b> tugmasini bosing!",
         btn: new InlineKeyboard()
-            .webApp("🖼️Kinolar", 'https://kino.saidnet.uz').row()
-            .url("📨Aloqa", 'https://t.me/saidweb')
+            .webApp("🎬Kinolar", 'https://kino.saidnet.uz').row()
+        // .url("📨Aloqa", 'https://t.me/saidweb')
         // .switchInlineCurrent("🔎Qidirish", "")
     },
     back: new InlineKeyboard().text("🔙Ortga", 'main'),
     sendMe: (media, video, index) => {
-        let txt = `<b>${media?.name}</b>${media?.type === 'serial' ? `\n${(+index + 1)}-qism` : ''}\n⏲Davomiyligi: <code>${formatDuration(video?.duration)}</code>\n📋Janrlar: <code>${media?.genres?.map((g) => g?.name).join(", ")}</code>\n🗓️Chiqarilgan: <code>${media?.year}</code>\n--------------------------------\n<i>${media?.desc || ''}</i>`;
+        let txt = `<b>${media?.name}</b>${media?.type === 'serial' ? `\n${(+index + 1)}-qism` : ''}\n⏳Davomiyligi: <code>${formatDuration(video?.duration)}</code>\n📋Janrlar: <code>${media?.genres?.map((g) => g?.name).join(", ")}</code>\n🗓️Chiqarilgan: <code>${media?.year}</code>\n--------------------------------\n<i>${media?.desc || ''}</i>`;
         const btn = [];
         let tempRow = [];
         if (media?.type === 'serial') {
@@ -90,6 +90,11 @@ export const adminReply = {
             ]);
             return { txt, btn: new InlineKeyboard(btn) };
         },
+        type: {
+            txt: "<b>📋Kanal turini tanlang</b>",
+            btn: new InlineKeyboard().text("Public", 'channel_type_public').text("Private", 'channel_type_private').text("Request", 'channel_type_request').row()
+                .text("🔙Bosh sahifa", "adminMain").text("🔗Majburiy obunalar", "channels")
+        },
         add: {
             txt: `<b>🔗Majburiy obuna uchun kanal qo'shish</b>${br}<i>🤖Botni kanalga admin qiling so'ng kanaldan istalgan postni botga <b>forward</b> qiling</i>`,
             btn: new InlineKeyboard().text("🔙Bosh sahifa", "adminMain").text("🔗Majburiy obunalar", "channels"),
@@ -97,14 +102,14 @@ export const adminReply = {
         },
         target: "<b>👥Obunachilar sonini kiriting</b>\n📋Namuna: <code>1000</code>",
         result: (info, target) => {
-            const txt = `<b>📨Tekshiring</b>${br}Nomi: <code>${info.title}</code>\nUsername: <code>${info.username || 'Yashirin'}</code>\nID: <code>${info.id}</code>\nMo'ljal: <code>${target}</code>${br}<i>🟢Barchasi to'g'ri bo'lsa <b>✅Tasdiqlash</b> tugmasini bosing!</i>`;
+            const txt = `<b>📨Tekshiring</b>${br}Nomi: <code>${info.title}</code>\nUsername: <code>${info.username || 'Yashirin'}</code>\nID: <code>${info.id}</code>\nMo'ljal: <code>${target}</code>\nTuri: <code>${info?.type}</code>${br}<i>🟢Barchasi to'g'ri bo'lsa <b>✅Tasdiqlash</b> tugmasini bosing!</i>`;
             const btn = new InlineKeyboard().text("✅Tasdiqlash", `channel_result`).row()
                 .text("🔙Bosh sahifa", "adminMain").text("🔗Majburiy obunalar", "channels");
             return { txt, btn };
         },
         success: "<b>✅Bajarildi!</b>",
         show: (c) => {
-            let txt = `<b>🔗Majburiy obuna</b>${br}ID: <code>${c.id}</code>\n📨Nomi: <code>${c.name}</code>\n🔗URL: <code>${c.username ? `@${c?.username}` : c.url}</code>\n👥Mo'ljal: <code>${c.result} / ${c.target}</code>\n🗓️Qo'shilgan: <code>${c.created}</code>`;
+            let txt = `<b>🔗Majburiy obuna</b>${br}ID: <code>${c.id}</code>\n📨Nomi: <code>${c.name}</code>\n🔗URL: <code>${c.username ? `@${c?.username}` : c.url}</code>\n👥Mo'ljal: <code>${c.result} / ${c.target}</code>\n🟢Turi: <code>${c?.type}</code>\n🗓️Qo'shilgan: <code>${c.created}</code>`;
 
             const btn = new InlineKeyboard()
                 .text("🗑O'chirish", `channel_alert_${c._id}`).row()
@@ -387,11 +392,11 @@ export const adminReply = {
             txt += `⭐Premium: <code>${media?.isPremium ? "Xa" : "Yo'q"}</code>\n`;
             if (media?.type === "movie") {
                 btn.text("🔁Kinoni yangilash", `media_editmedia_${media?._id}`).row();
-                txt += `⏲Davomiyligi: <code>${formatDuration(media?.mediaIds?.[0]?.duration)}</code>\n`;
+                txt += `⏳Davomiyligi: <code>${formatDuration(media?.mediaIds?.[0]?.duration)}</code>\n`;
             }
             else if (media?.type === "serial") {
                 btn.text("🔢Qismlar", `media_serials_${media?._id}`).row();
-                txt += `⏲Davomiyligi:\n`;
+                txt += `⏳Davomiyligi:\n`;
                 media.mediaIds.forEach((f, i) => {
                     txt += `${i + 1} - <code>${formatDuration(f.duration)}</code>\n`;
                 });

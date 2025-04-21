@@ -112,10 +112,10 @@ export default {
                 bot.api.deleteMessage(user?.id, msg.message_id).then(() => {
                     bot.api.sendMessage(user?.id, `😁Xavfsizlik uchun <b>${media?.name}</b> chatdan o'chirildi!\n🟢Uni qayta ko'rish uchun pastdagi tugmani bosing`, {
                         parse_mode: "HTML",
-                        reply_markup: new InlineKeyboard().text("Qayta ko'rish", `sendMe_${media?._id}${media?.type === 'serial' ? `_${index}` : ''}`)
+                        reply_markup: new InlineKeyboard().text("🔄Qayta ko'rish", `sendMe_${media?._id}${media?.type === 'serial' ? `_${index}` : ''}`)
                     }).catch(() => { });
                 }).catch(() => { });
-            }, 1000 * 60 * 60 * 60);
+            }, 1000 * 60 * 60 * 3);
 
             return res.send({
                 ok: true,

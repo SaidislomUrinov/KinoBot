@@ -67,7 +67,7 @@ function App() {
   return (
     <>
       <Top />
-      <div className="flex gap-[20px] items-center justify-start flex-col w-full p-[10px] pt-[70px] pb-[110px]">
+      <div className="flex h-[100vh] overflow-y-scroll gap-[20px] items-center justify-start flex-col w-full p-[10px] pt-[70px] pb-[110px]">
         <Search />
         <Genres />
         <Home />
